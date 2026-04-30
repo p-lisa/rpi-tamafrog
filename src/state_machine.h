@@ -9,7 +9,10 @@ struct FrogState{
         LOOT,
         EXECUTE
     };
-    Action action = Action::SLEEP;
+    Action action = Action::ACTIVE;
+
+    uint32_t stateStart = 0;
+    bool stateEntered = false;
 
     int lifepoints;
     float hunger;
