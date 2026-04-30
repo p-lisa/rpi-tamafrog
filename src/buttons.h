@@ -1,5 +1,7 @@
 # pragma once
 
+#include <Arduino.h>
+
 // INPUT PULLUP: pressed is LOW, unpressed is HIGH
 
 class Button{
