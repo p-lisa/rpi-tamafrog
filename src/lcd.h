@@ -46,33 +46,3 @@ class LCD{
     int pin_tx;
     Adafruit_ST7735* tft;
 };
-
-
-
-// class Timer{
-//   public:
-//     Timer(float frequency){
-//       triggerInterval = 1000.0 / frequency;
-//     }
-//     bool is_triggered(){
-//       uint32_t now = millis();
-//       if(now - lastTrigger >= triggerInterval){
-//         lastTrigger = now;
-//         return true;
-//       }
-//       return false;
-//     }
-//   private:
-//     uint32_t lastTrigger;
-//     uint32_t triggerInterval;
-// };
-
-// Timer displayTimer(10);
-// bool screenState = false;
-
-// ...
-// if(displayTimer.is_triggered()){
-//     screenState = !screenState;
-//     if(screenState) lcd.display_img(sleep_img);
-//     else lcd.display_img(loot_img);
-// }

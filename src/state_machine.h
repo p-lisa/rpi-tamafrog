@@ -9,7 +9,7 @@ struct FrogState{
         LOOT,
         EXECUTE
     };
-    Action action = Action::ACTIVE;
+    Action action = Action::SLEEP;
 
     uint32_t stateStart = 0;
     bool stateEntered = false;

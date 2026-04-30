@@ -1,8 +1,8 @@
 #include "buttons.h"
 #include "led.h"
 #include "lcd.h"
+#include "sensor.h"
 #include "assets/assets.h"
-// ...
 
 #include "state_machine.h"
 
@@ -11,15 +11,18 @@
 FrogState state;
 int duration = 2000;
 
+SensorData sensorData;
+
 LED led(20);
 LCD lcd(LCD::Params{.sck = 2, .tx = 3, .cs = 1, .res = 5, .dc = 4});
+Sensor sensor;
 Button eatBtn(21);
 Button lootBtn(18);
 Button executeBtn(16);
 
-// void execute_sleep() {
-//     lcd.display_img(eat_img);
-// }
+void execute_sleep() {
+    lcd.display_img(sleep_img);
+}
 
 void execute_active() {
     lcd.display_img(active_img);
@@ -39,11 +42,13 @@ void execute_execute() {
 }
 
 void app_init() {
-    led.init();
-    lcd.init();
-    eatBtn.init();
-    lootBtn.init();
-    executeBtn.init();
+  Serial.begin(9600);
+  led.init();
+  lcd.init();
+  sensor.init();
+  eatBtn.init();
+  lootBtn.init();
+  executeBtn.init();
 }
 
 void app_update() {
@@ -52,19 +57,33 @@ void app_update() {
     lootBtn.update();
     executeBtn.update();
 
+    if (sensor.read(sensorData) && sensorData.validity) {
+      Serial.printf(
+        "dist: %.3f m, str: %u, status: %u\n",
+        sensorData.distance_m,
+        sensorData.strength,
+        sensorData.status
+      );
+    }
+
     switch(state.action){
 
       case FrogState::Action::SLEEP:
-          // execute_sleep();
+          execute_sleep();
 
-          // if(sensor.dist < 40){
-          //     state.action = FrogState::Action::ACTIVE;
-          //     state.stateEntered = false;
-          // }
+          if(sensor.is_near(sensorData, 0.10f)){
+              state.action = FrogState::Action::ACTIVE;
+              state.stateEntered = false;
+          }
           break;
 
       case FrogState::Action::ACTIVE:
           execute_active();
+
+          if(sensor.is_far(sensorData, 1.0f)){
+              state.action = FrogState::Action::SLEEP;
+              state.stateEntered = false;
+          }
 
           if(eatBtn.pressed()){
               state.action = FrogState::Action::EAT;
@@ -130,5 +149,3 @@ void app_run() {
         app_update();
     }
 }
-
-
