@@ -9,58 +9,119 @@
 #include <Arduino.h>
 
 FrogState state;
+int duration = 2000;
 
-LED led(19);
+LED led(20);
 LCD lcd(LCD::Params{.sck = 2, .tx = 3, .cs = 1, .res = 5, .dc = 4});
 Button eatBtn(21);
 Button lootBtn(18);
-Button execBtn(16);
+Button executeBtn(16);
 
+// void execute_sleep() {
+//     lcd.display_img(eat_img);
+// }
+
+void execute_active() {
+    lcd.display_img(active_img);
+}
+
+void execute_eat() {
+    lcd.display_img(eat_img);
+}
+
+void execute_loot() {
+    // led.fire();
+    lcd.display_img(loot_img);
+}
+
+void execute_execute() {
+    lcd.display_img(execute_img);
+}
 
 void app_init() {
-    // state_init()
-    // buttons_init();
-    // sensor_init();
     led.init();
     lcd.init();
     eatBtn.init();
     lootBtn.init();
-    execBtn.init();
-    // servo_init();
-
+    executeBtn.init();
 }
 
-
-
 void app_update() {
-    led.fire();
 
     eatBtn.update();
     lootBtn.update();
-    execBtn.update();
-
-
-    // read inputs
-    // update state
-    // update outputs
-
+    executeBtn.update();
 
     switch(state.action){
-        case FrogState::Action::SLEEP:
-            // execute_sleep();
-            // if(snesor.dist < 40) state.action = FrogState::Action::ACTIVE;
-            break;
-        case FrogState::Action::ACTIVE:
-            break;
-        case FrogState::Action::EAT:
-            break;
-        case FrogState::Action::LOOT:
-            break;
-        case FrogState::Action::EXECUTE:
-            break;
-    }
 
+      case FrogState::Action::SLEEP:
+          // execute_sleep();
 
+          // if(sensor.dist < 40){
+          //     state.action = FrogState::Action::ACTIVE;
+          //     state.stateEntered = false;
+          // }
+          break;
+
+      case FrogState::Action::ACTIVE:
+          execute_active();
+
+          if(eatBtn.pressed()){
+              state.action = FrogState::Action::EAT;
+              state.stateEntered = false;
+          }
+          else if(lootBtn.pressed()){
+              state.action = FrogState::Action::LOOT;
+              state.stateEntered = false;
+          }
+          else if(executeBtn.pressed()){
+              state.action = FrogState::Action::EXECUTE;
+              state.stateEntered = false;
+          }
+          break;
+
+      case FrogState::Action::EAT:
+          if(!state.stateEntered){
+              execute_eat();
+              state.stateStart = millis();
+              state.stateEntered = true;
+          }
+
+          if(millis() - state.stateStart >= duration){
+              state.action = FrogState::Action::ACTIVE;
+              state.stateEntered = false;
+          }
+          break;
+
+      case FrogState::Action::LOOT:
+          if(!state.stateEntered){
+              execute_loot();
+              state.stateStart = millis();
+              state.stateEntered = true;
+          }
+
+          led.fire();
+
+          if(millis() - state.stateStart >= duration){
+              led.off();
+              state.action = FrogState::Action::ACTIVE;
+              state.stateEntered = false;
+          }
+          break;
+
+      case FrogState::Action::EXECUTE:
+          if(!state.stateEntered){
+              execute_execute();
+              state.stateStart = millis();
+              state.stateEntered = true;
+          }
+
+          if(millis() - state.stateStart >= duration){
+              state.action = FrogState::Action::ACTIVE;
+              state.stateEntered = false;
+          }
+          break;
+  }
 }
 
 void app_run() {
@@ -71,61 +132,3 @@ void app_run() {
 }
 
 
-
-// // pour animation ? 
-
-// struct Frame{
-//   uint16_t* frameData;
-//   float duration;
-// };
-
-// Frame frames[10];
-
-
-
-
-
-// // TODO remove animations for v1
-
-// void app_update() {
-//     buttons_update();
-//     sensor_update();
-
-//     bool near = sensor_is_near();
-//     uint32_t now = to_ms_since_boot(get_absolute_time());
-
-//     switch (ctx.state) {
-//         case AppState::SLEEP:
-//             if (near) enter_state(AppState::ACTIVE, now);
-//             break;
-
-//         case AppState::ACTIVE:
-//             if (!near) {
-//                 enter_state(AppState::SLEEP, now);
-//             } else if (button1_pressed()) {
-//                 enter_state(AppState::A_EAT, now);
-//             } else if (button2_pressed()) {
-//                 enter_state(AppState::A_LOOT, now);
-//             } else if (button3_pressed()) {
-//                 enter_state(AppState::A_EXECUTE, now);
-//             }
-//             break;
-
-//         case AppState::A_EAT:
-//             if (animation_finished(now)) {
-//                 enter_state(near ? AppState::ACTIVE : AppState::SLEEP, now);
-//             }
-//             break;
-
-//         case AppState::A_LOOT:
-//             if (animation_finished(now)) {
-//                 enter_state(near ? AppState::ACTIVE : AppState::SLEEP, now);
-//             }
-//             break;
-
-//         case AppState::A_EXECUTE:
-//             if (animation_finished(now)) {
-//                 enter_state(near ? AppState::ACTIVE : AppState::SLEEP, now);
-//             }
-//             break;
-//     }
