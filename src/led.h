@@ -4,8 +4,9 @@
 
 class LED{
     public:
-    LED(int p){
+    LED(int p, float phase = 0.0f){ // phaseoffset is used so that the fire patterns are indep for each led
         pin = p;
+        phaseOffset = phase;
     }
     void init(){
         pinMode(pin, OUTPUT);
@@ -17,7 +18,7 @@ class LED{
         digitalWrite(pin, false);
     }
     void fire(){
-        float t = millis() * 0.02;   // controls speed
+        float t = millis() * 0.02 + phaseOffset;;   // controls speed
         float n = noise1D(t);         // -1 to 1
         float brightness = mapNoise(n, 50, 255);
 
@@ -26,6 +27,7 @@ class LED{
 
     private:
     int pin;
+    float phaseOffset;
 
     float hash(int x) {
         x = (x << 13) ^ x;

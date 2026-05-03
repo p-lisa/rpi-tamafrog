@@ -1,6 +1,6 @@
 # Tamafrog
 
-An Arduino-based Raspberry Pi Pico W project that controls an interactive frog character using a TFT LCD screen (ST7735S 128x128), buttons, a distance sensor, an LED, and an SG90 servo driven through a PCA9685 PWM controller.
+An Arduino-based Raspberry Pi Pico W project that controls an interactive frog character using a TFT LCD screen (ST7735S 128x128), buttons, a distance sensor, four LEDs (2.1V/20mA), and an SG90 servo driven through a PCA9685 PWM controller.
 
 The project uses a simple state machine to switch between frog states such as 'sleeping', 'active', 'eating', 'looting', and 'executing'.
 
@@ -10,7 +10,7 @@ The project uses a simple state machine to switch between frog states such as 's
 - TFT LCD display for frog state images
 - Distance-based wake/sleep behavior using a laser distance sensor
 - Three physical buttons for user actions
-- LED feedback during the loot action
+- Four LEDs feedback during the loot action
 - SG90 servo control through a PCA9685 PWM driver
 - State-machine-based behavior flow
 
@@ -26,7 +26,7 @@ The project uses a simple state machine to switch between frog states such as 's
 | Push button on GP21 | Eat action |
 | Push button on GP18 | Loot action |
 | Push button on GP16 | Execute action |
-| LED on GP20 | Loot action feedback |
+| LEDs on GP13, 14, 15 and 20 | Loot action feedback |
 | External 5V power supply | Powers the servo output rail on the PCA9685 |
 
 ## Pinout and Wiring
@@ -43,6 +43,9 @@ The project uses a simple state machine to switch between frog states such as 's
 
 | Component | Raspberry Pi Pico W Pin |
 | --- | --- |
+| LED | GP13 |
+| LED | GP14 |
+| LED | GP15 |
 | LED | GP20 |
 
 ### LCD Screen
@@ -82,7 +85,7 @@ The SG90 servo is connected to channel 4 of the PCA9685.
 The firmware starts by initializing all hardware modules:
 
 - Serial output at 9600 baud
-- LED
+- Four LEDs
 - LCD screen
 - Distance sensor
 - PCA9685 servo driver
@@ -205,3 +208,8 @@ pio run -t upload
 ```bash
 pio device monitor -b 9600
 ```
+
+## Version History
+
+- **v1.0** – Initial release without animations
+- **v2.0 (upcoming)** – Add screen animations between state transitions
