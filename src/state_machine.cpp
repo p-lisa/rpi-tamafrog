@@ -2,7 +2,9 @@
 #include "assets/assets.h"
 #include "animation.h"
 
+static Animation eatAnimation(eat_anim, eat_anim_count, 150); 
 static Animation lootAnimation(loot_anim, loot_anim_count, 150); // defined in assets.h
+static Animation executeAnimation(execute_anim, execute_anim_count, 150); 
 
 static void enter_sleep(FrogState& state, AppContext& ctx) {
   ctx.lcd.display_img(sleep_img);
@@ -36,11 +38,12 @@ static void update_active(FrogState& state, AppContext& ctx) {
 }
 
 static void enter_eat(FrogState& state, AppContext& ctx) {
-  ctx.lcd.display_img(eat_img);
+  eatAnimation.reset(ctx.lcd);
   state.mark_entered();
 }
 
 static void update_eat(FrogState& state, AppContext& ctx) {
+  eatAnimation.update(ctx.lcd);
   if (state.elapsed(ctx.stateDuration)) {
     state.change(FrogState::Action::ACTIVE);
   }
@@ -68,13 +71,14 @@ static void update_loot(FrogState& state, AppContext& ctx) {
 }
 
 static void enter_execute(FrogState& state, AppContext& ctx) {
-  ctx.lcd.display_img(execute_img);
+  executeAnimation.reset(ctx.lcd);
   ctx.servo.add_angle_loop(ctx.servoChannel, 90);
-
   state.mark_entered();
 }
 
 static void update_execute(FrogState& state, AppContext& ctx) {
+  executeAnimation.update(ctx.lcd);
+  
   if (state.elapsed(ctx.stateDuration)) {
     state.change(FrogState::Action::ACTIVE);
   }
