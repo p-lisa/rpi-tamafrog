@@ -212,4 +212,4 @@ pio device monitor -b 9600
 ## Version History
 
 - **v1.0** – Initial release without animations
-- **v2.0 (upcoming)** – Add screen animations between state transitions
+- **v2.0** – Add screen animations on actions
