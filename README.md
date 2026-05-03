@@ -1,13 +1,13 @@
 # Tamafrog
 
-An Arduino-based Raspberry Pi Pico W project that controls an interactive frog character using a TFT LCD screen (ST7735S 128x128), buttons, a distance sensor, four LEDs (2.1V/20mA), and an SG90 servo driven through a PCA9685 PWM controller.
+An Arduino-based Raspberry Pi Pico W project that controls an interactive animated frog character using a TFT LCD screen (ST7735S 128x128), buttons, a laser range sensor, four LEDs, and an SG90 servo driven through a PCA9685 PWM controller.
 
 The project uses a simple state machine to switch between frog states such as 'sleeping', 'active', 'eating', 'looting', and 'executing'.
 
 ## Features
 
 - Raspberry Pi Pico W firmware written in C++ using the Arduino framework
-- TFT LCD display for frog state images
+- TFT LCD display for frog state animations
 - Distance-based wake/sleep behavior using a laser distance sensor
 - Three physical buttons for user actions
 - Four LEDs feedback during the loot action
@@ -19,14 +19,14 @@ The project uses a simple state machine to switch between frog states such as 's
 | Component | Purpose |
 | --- | --- |
 | Raspberry Pi Pico W | Main microcontroller |
-| TFT LCD screen (ST7735S 128x128) | Displays frog state images |
+| TFT LCD screen (ST7735S 128x128) | Displays frog state animations |
 | Nooploop TOF Sense Laser Range Sensor 18301 (EEHD-5PL7) | Detects whether something is near or far |
 | PCA9685 servo driver | Controls the SG90 servo through I2C |
 | SG90 servo | Executes a physical motion |
 | Push button on GP21 | Eat action |
 | Push button on GP18 | Loot action |
 | Push button on GP16 | Execute action |
-| LEDs on GP13, 14, 15 and 20 | Loot action feedback |
+| LEDs (red, 2.1V/20mA) on GP13/14/15/20 | Loot action feedback |
 | External 5V power supply | Powers the servo output rail on the PCA9685 |
 
 ## Pinout and Wiring
@@ -101,11 +101,11 @@ The project uses the following frog states:
 
 | State | Behavior | Transition |
 | --- | --- | --- |
-| `SLEEP` | Displays the sleeping image | Goes to `ACTIVE` when the sensor detects an object is near |
-| `ACTIVE` | Displays the active image | Goes back to `SLEEP` when the sensor detects an object is far |
-| `EAT` | Displays the eating image for set duration | Returns to `ACTIVE` |
-| `LOOT` | Displays the loot image and fires the LED for set duration | Turns the LED off and returns to `ACTIVE` |
-| `EXECUTE` | Displays the execute image and moves the servo to 90° | Returns to `ACTIVE` after 2 seconds |
+| `SLEEP` | Displays the sleeping animation | Goes to `ACTIVE` when the sensor detects an object is near |
+| `ACTIVE` | Displays the active animation | Goes back to `SLEEP` when the sensor detects an object is far |
+| `EAT` | Displays the eating animation for set duration | Returns to `ACTIVE` |
+| `LOOT` | Displays the loot animation and fires the LED for set duration | Turns the LED off and returns to `ACTIVE` |
+| `EXECUTE` | Displays the execute animation and moves the servo to 90° | Returns to `ACTIVE` after 2 seconds |
 
 Button behavior while active:
 
