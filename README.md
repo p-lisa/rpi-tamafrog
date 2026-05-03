@@ -1,6 +1,6 @@
 # Tamafrog
 
-An Arduino-based Raspberry Pi Pico W project that controls an interactive animated frog character using a TFT LCD screen (ST7735S 128x128), buttons, a laser range sensor, four LEDs (2.1V/20mA), and an SG90 servo driven through a PCA9685 PWM controller.
+An Arduino-based Raspberry Pi Pico W project that controls an interactive animated frog character using a TFT LCD screen (ST7735S 128x128), buttons, a laser range sensor, four LEDs, and an SG90 servo driven through a PCA9685 PWM controller.
 
 The project uses a simple state machine to switch between frog states such as 'sleeping', 'active', 'eating', 'looting', and 'executing'.
 
@@ -26,7 +26,7 @@ The project uses a simple state machine to switch between frog states such as 's
 | Push button on GP21 | Eat action |
 | Push button on GP18 | Loot action |
 | Push button on GP16 | Execute action |
-| LEDs on GP13, 14, 15 and 20 | Loot action feedback |
+| LEDs (red, 2.1V/20mA) on GP13/14/15/20 | Loot action feedback |
 | External 5V power supply | Powers the servo output rail on the PCA9685 |
 
 ## Pinout and Wiring
