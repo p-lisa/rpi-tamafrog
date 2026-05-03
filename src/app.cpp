@@ -9,10 +9,14 @@
 
 #include <Arduino.h>
 
-FrogState state;
-int duration = 2000;
+int lootFrame = 0; // index de l'img current
+unsigned long lootLastFrameTime = 0; // millis of when last changed
+const unsigned long lootFrameDuration = 150; // ms/frame
+
+int stateDuration = 2000;
 int servo_ch = 4;
 
+FrogState state;
 SensorData sensorData;
 
 LED leds[] = { // choose diff phaseoffsets for most
@@ -44,7 +48,15 @@ void execute_eat() {
 }
 
 void execute_loot() {
-    lcd.display_img(loot_img);
+  for (int i = 0; i < LED_COUNT; i++) {
+    leds[i].fire();
+  }
+
+  if (millis() - lootLastFrameTime >= lootFrameDuration) {
+    lootLastFrameTime = millis();
+    lootFrame = (lootFrame + 1) % loot_anim_count;
+    lcd.display_img(loot_anim[lootFrame]);
+  }
 }
 
 void execute_execute() {
@@ -121,7 +133,7 @@ void app_update() {
         state.stateEntered = true;
       }
 
-      if (millis() - state.stateStart >= duration) {
+      if (millis() - state.stateStart >= stateDuration) {
         state.action = FrogState::Action::ACTIVE;
         state.stateEntered = false;
       }
@@ -129,16 +141,17 @@ void app_update() {
 
     case FrogState::Action::LOOT:
       if (!state.stateEntered) {
-        execute_loot();
+        lootFrame = 0;
+        lootLastFrameTime = millis();
+        lcd.display_img(loot_anim[lootFrame]);
+
         state.stateStart = millis();
         state.stateEntered = true;
       }
 
-      for (int i = 0; i < LED_COUNT; i++) {
-        leds[i].fire();
-      }
+      execute_loot();
 
-      if (millis() - state.stateStart >= duration) {
+      if (millis() - state.stateStart >= stateDuration) {
         for (int i = 0; i < LED_COUNT; i++) {
           leds[i].off();
         }
@@ -154,7 +167,7 @@ void app_update() {
         state.stateEntered = true;
       }
 
-      if (millis() - state.stateStart >= duration) {
+      if (millis() - state.stateStart >= stateDuration) {
         state.action = FrogState::Action::ACTIVE;
         state.stateEntered = false;
       }
