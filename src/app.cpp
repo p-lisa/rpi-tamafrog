@@ -4,14 +4,12 @@
 #include "sensor.h"
 #include "servo.h"
 #include "assets/assets.h"
-
+#include "animation.h"
 #include "state_machine.h"
 
 #include <Arduino.h>
 
-int lootFrame = 0; // index de l'img current
-unsigned long lootLastFrameTime = 0; // millis of when last changed
-const unsigned long lootFrameDuration = 150; // ms/frame
+Animation lootAnimation(loot_anim, loot_anim_count, 150); // vars from assets.h
 
 int stateDuration = 2000;
 int servo_ch = 4;
@@ -35,19 +33,25 @@ Button eatBtn(21);
 Button lootBtn(18);
 Button executeBtn(16);
 
-void execute_sleep() {
+void enter_sleep() {
     lcd.display_img(sleep_img);
 }
 
-void execute_active() {
+void enter_active() {
     lcd.display_img(active_img);
 }
 
-void execute_eat() {
+void enter_eat() {
     lcd.display_img(eat_img);
 }
 
-void execute_loot() {
+void enter_loot() {
+  lootFrame = 0;
+  lootLastFrameTime = millis();
+  lcd.display_img(loot_anim[lootFrame]);
+}
+
+void update_loot() {
   for (int i = 0; i < LED_COUNT; i++) {
     leds[i].fire();
   }
@@ -59,7 +63,13 @@ void execute_loot() {
   }
 }
 
-void execute_execute() {
+void exit_loot() {
+  for (int i = 0; i < LED_COUNT; i++) {
+    leds[i].off();
+  }
+}
+
+void enter_execute() {
     lcd.display_img(execute_img);
     servo.add_angle_loop(servo_ch, 90);
 }
@@ -98,78 +108,62 @@ void app_update() {
   switch (state.action) {
 
     case FrogState::Action::SLEEP:
-      execute_sleep();
+      enter_sleep();
 
       if (sensor.is_near(sensorData, 0.10f)) {
-        state.action = FrogState::Action::ACTIVE;
-        state.stateEntered = false;
+        state.change(FrogState::Action::ACTIVE);
       }
       break;
 
     case FrogState::Action::ACTIVE:
-      execute_active();
+      enter_active();
 
       if (sensor.is_far(sensorData, 1.0f)) {
-        state.action = FrogState::Action::SLEEP;
-        state.stateEntered = false;
+        state.change(FrogState::Action::SLEEP);
       }
 
       if (eatBtn.pressed()) {
-        state.action = FrogState::Action::EAT;
-        state.stateEntered = false;
+        state.change(FrogState::Action::EAT);
       } else if (lootBtn.pressed()) {
-        state.action = FrogState::Action::LOOT;
-        state.stateEntered = false;
+        state.change(FrogState::Action::LOOT);
       } else if (executeBtn.pressed()) {
-        state.action = FrogState::Action::EXECUTE;
-        state.stateEntered = false;
+        state.change(FrogState::Action::EXECUTE);
       }
       break;
 
     case FrogState::Action::EAT:
       if (!state.stateEntered) {
-        execute_eat();
-        state.stateStart = millis();
-        state.stateEntered = true;
+        enter_eat();
+        state.mark_entered();
       }
 
-      if (millis() - state.stateStart >= stateDuration) {
-        state.action = FrogState::Action::ACTIVE;
-        state.stateEntered = false;
+      if (state.elapsed(stateDuration)) {
+        state.change(FrogState::Action::ACTIVE);
       }
       break;
 
     case FrogState::Action::LOOT:
       if (!state.stateEntered) {
-        lootFrame = 0;
-        lootLastFrameTime = millis();
-        lcd.display_img(loot_anim[lootFrame]);
-
-        state.stateStart = millis();
-        state.stateEntered = true;
+        enter_loot();
+        state.mark_entered();
       }
 
-      execute_loot();
+      update_loot();
 
-      if (millis() - state.stateStart >= stateDuration) {
-        for (int i = 0; i < LED_COUNT; i++) {
-          leds[i].off();
-        }
-        state.action = FrogState::Action::ACTIVE;
-        state.stateEntered = false;
+      if (state.elapsed(stateDuration)) {
+        exit_loot();
+        state.change(FrogState::Action::ACTIVE);
       }
       break;
 
     case FrogState::Action::EXECUTE:
       if (!state.stateEntered) {
-        execute_execute();
-        state.stateStart = millis();
-        state.stateEntered = true;
+        enter_execute();
+        state.mark_entered();
       }
 
-      if (millis() - state.stateStart >= stateDuration) {
-        state.action = FrogState::Action::ACTIVE;
-        state.stateEntered = false;
+      if (state.elapsed(stateDuration)) {
+        state.change(FrogState::Action::ACTIVE);
       }
       break;
   }
