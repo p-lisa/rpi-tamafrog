@@ -2,36 +2,30 @@
 #include <Arduino.h>
 #include "lcd.h"
 
-int lootFrame = 0; // index de l'img current
-unsigned long lootLastFrameTime = 0; // millis of when last changed
-const unsigned long lootFrameDuration = 150; // ms/frame
-
 class Animation {
-    public:
-    Animation(const uint16_t* const* frames, int count, unsigned long frameDuration) {
-        _frames = frames; // imgs in anim, defined in assets.h
-        _count= count; // count of img in anim, defined in assets.H
-        _frameDuration = frameDuration; // ms/frame
-    }
+public:
+  Animation(const uint16_t* const* frames, int count, unsigned long frameDuration)
+    : _frames(frames), _count(count), _frameDuration(frameDuration) {}
 
-    void reset(LCD& lcd) {
-        currentFrame = 0;
-        lastFrameTime = millis();
-        lcd.display_img(_frames[currentFrame]);
-    }
+  void reset(LCD& lcd) { // when the animation is entered
+    _currentFrame = 0;
+    _lastFrameTime = millis();
+    lcd.display_img(_frames[_currentFrame]);
+  }
 
-    void update(LCD& lcd) {
-        if (millis() - lastFrameTime >= _frameDuration) {
-        lastFrameTime = millis();
-        currentFrame = (currentFrame + 1) % _count;
-        lcd.display_img(_frames[currentFrame]);
-        }
+  void update(LCD& lcd) { // to display the actual animation
+    if (millis() - _lastFrameTime >= _frameDuration) {
+      _lastFrameTime = millis();
+      _currentFrame = (_currentFrame + 1) % _count;
+      lcd.display_img(_frames[_currentFrame]);
     }
+  }
 
-    private:
-    const uint16_t* const* _frames;
-    int _count;
-    unsigned long _frameDuration;
-    int currentFrame = 0; // index de l'img current
-    unsigned long lastFrameTime = 0; // millis of when last changed
+private:
+  const uint16_t* const* _frames; // imgs in anim, defined in assets.h
+  int _count; // count of img in anim, defined in assets.h
+  unsigned long _frameDuration; // ms/frame
+
+  int _currentFrame = 0; // index de l'img current
+  unsigned long _lastFrameTime = 0; // millis of when last changed
 };
