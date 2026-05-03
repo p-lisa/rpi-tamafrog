@@ -2,6 +2,7 @@
 #include "led.h"
 #include "lcd.h"
 #include "sensor.h"
+#include "servo.h"
 #include "assets/assets.h"
 
 #include "state_machine.h"
@@ -10,12 +11,14 @@
 
 FrogState state;
 int duration = 2000;
+int servo_ch = 4;
 
 SensorData sensorData;
 
 LED led(20);
 LCD lcd(LCD::Params{.sck = 2, .tx = 3, .cs = 1, .res = 5, .dc = 4});
 Sensor sensor;
+PCAServo servo(6, 7);
 Button eatBtn(21);
 Button lootBtn(18);
 Button executeBtn(16);
@@ -33,26 +36,30 @@ void execute_eat() {
 }
 
 void execute_loot() {
-    // led.fire();
     lcd.display_img(loot_img);
 }
 
 void execute_execute() {
     lcd.display_img(execute_img);
+    servo.add_angle_loop(servo_ch, 90);
 }
 
+
 void app_init() {
-  Serial.begin(9600);
-  led.init();
-  lcd.init();
-  sensor.init();
-  eatBtn.init();
-  lootBtn.init();
-  executeBtn.init();
+    Serial.begin(9600);
+
+    led.init();
+    lcd.init();
+    sensor.init();
+    servo.init();
+    servo.set_angle(servo_ch, 0);
+    eatBtn.init();
+    lootBtn.init();
+    executeBtn.init();
+
 }
 
 void app_update() {
-
     eatBtn.update();
     lootBtn.update();
     executeBtn.update();
